@@ -1,0 +1,33 @@
+[project]
+name = "caryak"
+version = "1.0.0"
+description = "Scraping car pricng data from the internet"
+authors = [
+    {name = "Muhammad Shafik Bin Mazlinan", email = "muhammadshafikbm@1tx.io"},
+]
+dependencies = [
+    "Scrapy>=2.7.1",
+    "scrapy-selenium>=0.0.7",
+    "scrapy-splash>=0.8.0",
+    "scrapy-playwright>=0.0.24",
+    "flask>=2.3.2",
+    "gunicorn>=20.1.0",
+    "gevent>=22.10.2",
+    "pymongo>=4.3.3",
+    "robotexclusionrulesparser>=1.7.1",
+    "toml>=0.10.2",
+    "latest-user-agents>=0.0.3",
+    "more-itertools>=9.1.0",
+    "names>=0.3.0",
+    "scrapyd>=1.4.2",
+    "scrapyd-client>=1.2.3",
+    "setuptools>=67.8.0",
+]
+requires-python = ">=3.10"
+readme = "readme.md"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+

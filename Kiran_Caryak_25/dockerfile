@@ -1,0 +1,61 @@
+FROM ubuntu:22.04
+
+# setting up environment variables.
+ARG DEBIAN_FRONTEND=noninteractive
+
+ENV TZ=UTC
+ENV LANG=C.UTF-8
+ENV PATH="$PATH:/home/caryak/.local/bin"
+
+
+# Initial Ubuntu installation.
+RUN apt-get update && \
+  apt-get install python3 -y python3-dev -y python3-pip -y && \
+  apt-get clean && \
+  apt-get autoremove
+
+
+# User setup.
+RUN groupadd --gid 1001 caryak && \
+  useradd --gid caryak --uid 1001 caryak && \
+  mkdir /home/caryak && \
+  chown -hR caryak:caryak /home/caryak
+
+
+# Stay as CarYak user for as many steps as possible for security.
+USER caryak
+WORKDIR /home/caryak
+
+
+# Python package installation and setup.
+COPY --chown=caryak:caryak pyproject.toml pdm.lock readme.md ./
+
+RUN python3 -m pip install --upgrade pip && \
+  python3 -m pip install pdm && \
+  python3 -m pdm install
+
+
+# Copy the code after installation steps. That way, changes to the code won't cause you to rerun the entire installation again.
+COPY --chown=caryak:caryak scrapy.cfg setup.py services.py ./
+COPY --chown=caryak:caryak car_prices car_prices/
+COPY --chown=caryak:caryak config config/
+
+RUN mv config/scrapyd.conf .scrapyd.conf && \
+  mv config/gunicorn.conf.py ./ && \
+  mkdir --parents eggs/caryak && \
+  mkdir logs && \
+  mkdir sockets && \
+  python3 -m pdm run python setup.py bdist_egg
+
+
+# Testing
+COPY --chown=caryak:caryak tests/ tests/
+
+RUN python3 -m pdm run python -m unittest
+
+
+# Application settings
+ENTRYPOINT ["python3", "-m", "pdm", "run", "python"]
+CMD ["services.py"]
+EXPOSE 6800
+
